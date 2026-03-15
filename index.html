@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free AI Tools Hub | Generate Images & Text Instantly</title>
+    <meta name="description" content="Free AI Tools Hub offers powerful AI image generation and text generation tools. Create stunning visuals and content instantly with our easy-to-use interface.">
+    <meta name="keywords" content="AI, Image Generator, Text Generator, Free AI Tools, AI SaaS">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com">
+    <meta property="og:title" content="Free AI Tools Hub">
+    <meta property="og:description" content="Generate AI images and text instantly for free.">
+    <meta property="og:image" content="https://yourdomain.com/og-image.jpg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide sections by default, managed by JS */
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center cursor-pointer" onclick="app.navigate('home')">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-bolt text-brand-500 text-2xl"></i>
+                    </div>
+                    <div class="hidden md:block ml-3">
+                        <div class="text-xl font-bold tracking-tight text-white">AI<span class="text-brand-500">Hub</span></div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="app.navigate('home')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 transition">Dashboard</button>
+                        <button onclick="app.navigate('tools')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition">Tools</button>
+                        <button onclick="app.navigate('pricing')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition">Pricing</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex flex-col items-end">
+                        <span class="text-xs text-slate-400">Credits Remaining</span>
+                        <span id="credit-display" class="text-sm font-bold text-brand-400">5 / 5</span>
+                    </div>
+                    <button class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-brand-500/20">
+                        Upgrade
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+
+        <!-- HOME / DASHBOARD VIEW -->
+        <div id="view-home" class="view-section active">
+            <!-- Hero -->
+            <div class="text-center mb-16 animate-slide-up">
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4">
+                    Free <span class="gradient-text">AI Tools Hub</span>
+                </h1>
+                <p class="mt-4 text-xl text-slate-400 max-w-2xl mx-auto">
+                    Generate stunning AI images and compelling text instantly. No signup required for basic usage.
+                </p>
+                <div class="mt-8 flex justify-center gap-4">
+                    <button onclick="app.scrollTo('image-gen')" class="px-8 py-3 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-semibold transition shadow-lg shadow-brand-500/25 flex items-center gap-2">
+                        <i class="fa-solid fa-image"></i> Create Image
+                    </button>
+                    <button onclick="app.scrollTo('text-gen')" class="px-8 py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-white font-semibold transition border border-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib"></i> Write Text
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tools Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                
+                <!-- Image Generator Card -->
+                <div id="image-gen" class="glass-panel rounded-2xl p-6 shadow-xl border-t-4 border-brand-500 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-9xl text-brand-500"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-image text-brand-500"></i> AI Image Generator
+                            </h2>
+                            <span class="text-xs bg-brand-900 text-brand-300 px-2 py-1 rounded border border-brand-700">Beta</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Prompt</label>
+                                <input type="text" id="img-prompt" placeholder="A futuristic city at sunset, cyberpunk style..." 
+                                    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                            </div>
+                            
+                            <button onclick="app.generateImage()" id="btn-gen-img" class="w-full bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg transition transform active:scale-95 flex justify-center items-center gap-2">
+                                <span>Generate Image</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                            <!-- Result Area -->
+                            <div id="img-result-area" class="hidden mt-6 animate-fade-in">
+                                <div class="relative aspect-video bg-slate-900 rounded-lg overflow-hidden border border-slate-700 group/img">
+                                    <img id="img-output" src="" alt="Generated" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-3">
+                                        <button onclick="app.downloadImage()" class="p-2 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Download">
+                                            <i class="fa-solid fa-download"></i>
+                                        </button>
+                                        <button onclick="app.copyPrompt('img')" class="p-2 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Copy Prompt">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p id="img-meta" class="text-xs text-slate-500 mt-2 text-right"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Generator Card -->
+                <div id="text-gen" class="glass-panel rounded-2xl p-6 shadow-xl border-t-4 border-purple-500 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fa-solid fa-align-left text-9xl text-purple-500"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-pen-fancy text-purple-500"></i> AI Text Generator
+                            </h2>
+                            <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded border border-purple-700">GPT-4o</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Prompt / Topic</label>
+                                <textarea id="text-prompt" rows="3" placeholder="Write a blog outline about the benefits of meditation..." 
+                                    class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition resize-none"></textarea>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="app.generateText()" id="btn-gen-text" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-4 rounded-lg transition transform active:scale-95 flex justify-center items-center gap-2">
+                                    <span>Generate Text</span>
+                                </button>
+                                <button onclick="app.regenerateText()" id="btn-regen-text" class="hidden px-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition" title="Regenerate">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                </button>
+                            </div>
+
+                            <!-- Result Area -->
+                            <div id="text-result-area" class="hidden mt-6 animate-fade-in">
+                                <div class="bg-slate-900/80 rounded-lg p-4 border border-slate-700 relative group/text">
+                                    <div id="text-output" class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap"></div>
+                                    <button onclick="app.copyText()" class="absolute top-2 right-2 p-1.5 bg-slate-800 rounded text-slate-400 hover:text-white opacity-0 group-hover/text:opacity-100 transition">
+                                        <i class="fa-regular fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="mt-12">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Recent Generations
+                </h3>
+                <div id="history-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- History items injected here -->
+                    <div class="col-span-full text-center py-8 text-slate-500 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                        No history yet. Start generating!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLS DIRECTORY VIEW -->
+        <div id="view-tools" class="view-section">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-white">AI Tools Directory</h2>
+                <p class="text-slate-400">Explore our suite of AI-powered utilities.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Tool Card 1 -->
+                <div class="glass-panel p-6 rounded-xl hover:bg-slate-800/50 transition cursor-pointer group">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-pen-ruler text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">AI Logo Generator</h3>
+                    <p class="text-sm text-slate-400 mb-4">Create unique brand identities and logos in seconds.</p>
+                    <span class="text-xs font-semibold text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Coming Soon</span>
+                </div>
+
+                <!-- Tool Card 2 -->
+                <div class="glass-panel p-6 rounded-xl hover:bg-slate-800/50 transition cursor-pointer group">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-file-lines text-green-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">AI Blog Writer</h3>
+                    <p class="text-sm text-slate-400 mb-4">Generate full-length SEO-optimized blog posts.</p>
+                    <span class="text-xs font-semibold text-green-400 bg-green-400/10 px-2 py-1 rounded">Coming Soon</span>
+                </div>
+
+                <!-- Tool Card 3 -->
+                <div class="glass-panel p-6 rounded-xl hover:bg-slate-800/50 transition cursor-pointer group">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-wand-magic text-purple-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">AI Prompt Enhancer</h3>
+                    <p class="text-sm text-slate-400 mb-4">Improve your prompts for Midjourney, DALL-E, and Stable Diffusion.</p>
+                    <span class="text-xs font-semibold text-purple-400 bg-purple-400/10 px-2 py-1 rounded">New</span>
+                </div>
+
+                <!-- Tool Card 4 -->
+                <div class="glass-panel p-6 rounded-xl hover:bg-slate-800/50 transition cursor-pointer group">
+                    <div class="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-image text-pink-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Background Remover</h3>
+                    <p class="text-sm text-slate-400 mb-4">Instantly remove backgrounds from photos with AI precision.</p>
+                    <span class="text-xs font-semibold text-pink-400 bg-pink-400/10 px-2 py-1 rounded">Pro</span>
+                </div>
+            </div>
+
+            <!-- Affiliate Section -->
+            <div class="mt-16">
+                <h3 class="text-xl font-bold text-white mb-6">Recommended Tools</h3>
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-1 border border-slate-700">
+                    <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black font-bold">C</div>
+                                <span class="font-bold text-white">ChatGPT Plus</span>
+                            </div>
+                            <p class="text-sm text-slate-400">Upgrade your AI experience.</p>
+                        </a>
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">M</div>
+                                <span class="font-bold text-white">Midjourney</span>
+                            </div>
+                            <p class="text-sm text-slate-400">Best for artistic images.</p>
+                        </a>
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">H</div>
+                                <span class="font-bold text-white">Hostinger</span>
+                            </div>
+                            <p class="text-sm text-slate-400">Host your AI projects.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ad Placeholder -->
+            <div class="mt-12 p-8 border-2 border-dashed border-slate-700 rounded-xl text-center bg-slate-800/20">
+                <p class="text-slate-500 text-sm font-medium">Advertisement</p>
+                <div class="h-24 flex items-center justify-center text-slate-600">
+                    Google AdSense Placeholder (728x90)
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING VIEW -->
+        <div id="view-pricing" class="view-section">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white">Simple Pricing</h2>
+                <p class="text-slate-400 mt-2">Start for free, upgrade when you need more power.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Plan -->
+                <div class="glass-panel rounded-2xl p-8 border border-slate-700 flex flex-col">
+                    <h3 class="text-xl font-bold text-white">Free Plan</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-bold text-white">$0</span>
+                        <span class="text-slate-400">/month</span>
+                    </div>
+                    <p class="text-slate-400 mb-6">Perfect for hobbyists and trying things out.</p>
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-green-500 mr-3"></i> 5 Generations / day</li>
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-green-500 mr-3"></i> Standard Speed</li>
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-green-500 mr-3"></i> Community Support</li>
+                        <li class="flex items-center text-slate-400"><i class="fa-solid fa-xmark text-slate-600 mr-3"></i> No History Export</li>
+                    </ul>
+                    <button class="w-full py-3 rounded-lg border border-slate-600 text-white font-semibold hover:bg-slate-800 transition">Current Plan</button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="glass-panel rounded-2xl p-8 border border-brand-500 relative overflow-hidden flex flex-col transform md:-translate-y-4 shadow-2xl shadow-brand-900/20">
+                    <div class="absolute top-0 right-0 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
+                    <h3 class="text-xl font-bold text-white">Pro Plan</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-bold text-white">$9</span>
+                        <span class="text-slate-400">/month</span>
+                    </div>
+                    <p class="text-slate-400 mb-6">For creators and professionals who need unlimited power.</p>
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> Unlimited Generations</li>
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> Faster Responses</li>
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> Priority Access</li>
+                        <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> History Export</li>
+                    </ul>
+                    <button class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition shadow-lg shadow-brand-600/25">Upgrade Now</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-bolt text-brand-500 text-xl"></i>
+                        <span class="text-xl font-bold text-white">AIHub</span>
+                    </div>
+                    <p class="text-slate-400 text-sm max-w-xs">
+                        Empowering creators with free and accessible AI tools. Generate, create, and innovate without limits.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Platform</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-brand-400 transition">Image Generator</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition">Text Generator</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-brand-400 transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm">&copy; 2023 AI Tools Hub. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white transition"><i class="fa-brands fa-discord"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="bg-slate-800 border border-slate-700 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-green-500"></i>
+            <span id="toast-message">Operation successful</span>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        /**
+         * Credit Management System
+         * Handles the 5 generations per day limit using localStorage
+         */
+        class CreditManager {
+            constructor() {
+                this.key = 'ai_hub_credits';
+                this.dateKey = 'ai_hub_date';
+                this.maxCredits = 5;
+            }
+
+            getStatus() {
+                const savedDate = localStorage.getItem(this.dateKey);
+                const today = new Date().toDateString();
+                let credits = parseInt(localStorage.getItem(this.key)) || this.maxCredits;
+
+                // Reset if new day
+                if (savedDate !== today) {
+                    credits = this.maxCredits;
+                    localStorage.setItem(this.key, credits);
+                    localStorage.setItem(this.dateKey, today);
+                }
+
+                return { credits, max: this.maxCredits };
+            }
+
+            useCredit() {
+                const status = this.getStatus();
+                if (status.credits > 0) {
+                    const newCredits = status.credits - 1;
+                    localStorage.setItem(this.key, newCredits);
+                    return { success: true, remaining: newCredits };
+                }
+                return { success: false, remaining: 0 };
+            }
+
+            canGenerate() {
+                return this.getStatus().credits > 0;
+            }
+        }
+
+        /**
+         * Main Application Logic
+         */
+        const app = {
+            credits: new CreditManager(),
+            currentImageUrl: null,
+            currentPrompt: null,
+
+            init() {
+                this.updateCreditDisplay();
+                this.renderHistory();
+                
+                // Check for daily reset on load
+                this.credits.getStatus(); 
+            },
+
+            // Navigation
+            navigate(viewId) {
+                // Hide all views
+                document.querySelectorAll('.view-section').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // Show target view
+                const target = document.getElementById(`view-${viewId}`);
+                if (target) {
+                    target.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                // Update nav active state (simple implementation)
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    // Reset styles logic could go here
+                });
+            },
+
+            scrollTo(id) {
+                this.navigate('home');
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            },
+
+            updateCreditDisplay() {
+                const status = this.credits.getStatus();
+                document.getElementById('credit-display').innerText = `${status.credits} / ${status.max}`;
+            },
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const msgEl = document.getElementById('toast-message');
+                const iconEl = document.getElementById('toast-icon');
+
+                msgEl.innerText = message;
+                iconEl.className = type === 'error' 
+                    ? 'fa-solid fa-circle-exclamation text-red-500' 
+                    : 'fa-solid fa-circle-check text-green-500';
+
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            },
+
+            setLoading(btnId, isLoading) {
+                const btn = document.getElementById(btnId);
+                if (isLoading) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<div class="loader"></div> Processing...`;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    // Reset button text based on ID
+                    if(btnId === 'btn-gen-img') btn.innerHTML = `<span>Generate Image</span><i class="fa-solid fa-arrow-right"></i>`;
+                    if(btnId === 'btn-gen-text') btn.innerHTML = `<span>Generate Text</span>`;
+                }
+            },
+
+            async generateImage() {
+                if (!this.credits.canGenerate()) {
+                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
+                    return;
+                }
+
+                const promptInput = document.getElementById('img-prompt');
+                const prompt = promptInput.value.trim();
+                
+                if (!prompt) {
+                    this.showToast('Please enter a prompt', 'error');
+                    return;
+                }
+
+                this.setLoading('btn-gen-img', true);
+                const resultArea = document.getElementById('img-result-area');
+                resultArea.classList.add('hidden');
+
+                try {
+                    // Use Credit
+                    this.credits.useCredit();
+                    this.updateCreditDisplay();
+
+                    // Call Real Image API
+                    const response = await fetch('http://100.101.125.66:9200/v1/images/generations', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            model: "black-forest-labs/FLUX.1-schnell",
+                            n: 1,
+                            width: 1024,
+                            height: 1024
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    const imageUrl = data.data[0].url;
+                    
+                    // Render
+                    this.currentImageUrl = imageUrl;
+                    this.currentPrompt = prompt;
+                    
+                    const imgEl = document.getElementById('img-output');
+                    imgEl.src = imageUrl;
+                    
+                    document.getElementById('img-meta').innerText = `Prompt: "${prompt}"`;
+                    resultArea.classList.remove('hidden');
+                    
+                    this.saveToHistory('Image', prompt, imageUrl);
+                    this.showToast('Image generated successfully!');
+
+                } catch (error) {
+                    console.error(error);
+                    this.showToast(error.message || 'Failed to generate image', 'error');
+                } finally {
+                    this.setLoading('btn-gen-img', false);
+                }
+            },
+
+            async generateText() {
+                if (!this.credits.canGenerate()) {
+                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
+                    return;
+                }
+
+                const promptInput = document.getElementById('text-prompt');
+                const prompt = promptInput.value.trim();
+                
+                if (!prompt) {
+                    this.showToast('Please enter a topic', 'error');
+                    return;
+                }
+
+                this.setLoading('btn-gen-text', true);
+                document.getElementById('text-result-area').classList.add('hidden');
+
+                try {
+                    this.credits.useCredit();
+                    this.updateCreditDisplay();
+
+                    // Call Real Text API
+                    const response = await fetch('http://172.235.8.159:8080/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: "openrouter/auto",
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: prompt
+                                }
+                            ]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    const generatedText = data.choices[0].message.content;
+                    
+                    document.getElementById('text-output').innerText = generatedText;
+                    document.getElementById('text-result-area').classList.remove('hidden');
+                    document.getElementById('btn-regen-text').classList.remove('hidden');
+                    
+                    this.saveToHistory('Text', prompt, generatedText.substring(0, 50) + '...');
+                    this.showToast('Text generated successfully!');
+
+                } catch (error) {
+                    console.error(error);
+                    this.showToast(error.message || 'Failed to generate text', 'error');
+                } finally {
+                    this.setLoading('btn-gen-text', false);
+                }
+            },
+
+            regenerateText() {
+                this.generateText();
+            },
+
+            // --- Utilities ---
+
+            downloadImage() {
+                if (!this.currentImageUrl) return;
+                const link = document.createElement('a');
+                link.href = this.currentImageUrl;
+                link.download = `ai-generated-${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.showToast('Download started');
+            },
+
+            copyText() {
+                const text = document.getElementById('text-output').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showToast('Text copied to clipboard');
+                });
+            },
+
+            copyPrompt(type) {
+                const prompt = type === 'img' ? this.currentPrompt : document.getElementById('text-prompt').value;
+                navigator.clipboard.writeText(prompt).then(() => {
+                    this.showToast('Prompt copied');
+                });
+            },
+
+            // --- History Management ---
+
+            saveToHistory(type, prompt, result) {
+                let history = JSON.parse(localStorage.getItem('ai_hub_history') || '[]');
+                history.unshift({
+                    type,
+                    prompt,
+                    result,
+                    date: new Date().toLocaleTimeString()
+                });
+                // Keep last 10
+                if (history.length > 10) history.pop();
+                localStorage.setItem('ai_hub_history', JSON.stringify(history));
+                this.renderHistory();
+            },
+
+            renderHistory() {
+                const container = document.getElementById('history-grid');
+                const history = JSON.parse(localStorage.getItem('ai_hub_history') || '[]');
+
+                if (history.length === 0) {
+                    container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">No history yet. Start generating!</div>`;
+                    return;
+                }
+
+                container.innerHTML = history.map(item => `
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-brand-500/50 transition group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${item.type === 'Image' ? 'bg-blue-900 text-blue-300' : 'bg-purple-900 text-purple-300'}">${item.type}</span>
+                            <span class="text-xs text-slate-500">${item.date}</span>
+                        </div>
+                        <p class="text-sm text-slate-300 truncate mb-2" title="${item.prompt}">"${item.prompt}"</p>
+                        <div class="h-1 w-full bg-slate-700 rounded overflow-hidden">
+                            <div class="h-full bg-brand-500 w-full opacity-50"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
