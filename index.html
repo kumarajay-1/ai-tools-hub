@@ -123,6 +123,23 @@
             display: block;
             animation: fadeIn 0.4s ease-out;
         }
+
+        /* Modal styles */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Streaming text cursor */
+        .streaming-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -151,8 +168,11 @@
                         <span class="text-xs text-slate-400">Credits Remaining</span>
                         <span id="credit-display" class="text-sm font-bold text-brand-400">5 / 5</span>
                     </div>
-                    <button class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-brand-500/20">
+                    <button onclick="app.showUpgradeModal()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-brand-500/20">
                         Upgrade
+                    </button>
+                    <button onclick="app.showLoginModal()" class="hidden md:block text-slate-300 hover:text-white px-3 py-2 text-sm font-medium transition">
+                        Login
                     </button>
                 </div>
             </div>
@@ -195,7 +215,7 @@
                             <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                                 <i class="fa-solid fa-image text-brand-500"></i> AI Image Generator
                             </h2>
-                            <span class="text-xs bg-brand-900 text-brand-300 px-2 py-1 rounded border border-brand-700">Beta</span>
+                            <span class="text-xs bg-brand-900 text-brand-300 px-2 py-1 rounded border border-brand-700">FLUX.1</span>
                         </div>
                         
                         <div class="space-y-4">
@@ -212,14 +232,17 @@
 
                             <!-- Result Area -->
                             <div id="img-result-area" class="hidden mt-6 animate-fade-in">
-                                <div class="relative aspect-video bg-slate-900 rounded-lg overflow-hidden border border-slate-700 group/img">
-                                    <img id="img-output" src="" alt="Generated" class="w-full h-full object-cover">
+                                <div class="relative aspect-square bg-slate-900 rounded-lg overflow-hidden border border-slate-700 group/img">
+                                    <img id="img-output" src="" alt="Generated" class="w-full h-full object-contain">
                                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-3">
-                                        <button onclick="app.downloadImage()" class="p-2 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Download">
-                                            <i class="fa-solid fa-download"></i>
+                                        <button onclick="app.downloadImage()" class="p-3 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Download">
+                                            <i class="fa-solid fa-download text-lg"></i>
                                         </button>
-                                        <button onclick="app.copyPrompt('img')" class="p-2 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Copy Prompt">
-                                            <i class="fa-regular fa-copy"></i>
+                                        <button onclick="app.openImageInNewTab()" class="p-3 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Open in New Tab">
+                                            <i class="fa-solid fa-external-link-alt text-lg"></i>
+                                        </button>
+                                        <button onclick="app.copyPrompt('img')" class="p-3 bg-white rounded-full text-slate-900 hover:bg-slate-200 transition" title="Copy Prompt">
+                                            <i class="fa-regular fa-copy text-lg"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -239,7 +262,7 @@
                             <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                                 <i class="fa-solid fa-pen-fancy text-purple-500"></i> AI Text Generator
                             </h2>
-                            <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded border border-purple-700">GPT-4o</span>
+                            <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded border border-purple-700">GPT-4</span>
                         </div>
                         
                         <div class="space-y-4">
@@ -261,13 +284,24 @@
                             <!-- Result Area -->
                             <div id="text-result-area" class="hidden mt-6 animate-fade-in">
                                 <div class="bg-slate-900/80 rounded-lg p-4 border border-slate-700 relative group/text">
-                                    <div id="text-output" class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap"></div>
+                                    <div id="text-output" class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap streaming-cursor"></div>
                                     <button onclick="app.copyText()" class="absolute top-2 right-2 p-1.5 bg-slate-800 rounded text-slate-400 hover:text-white opacity-0 group-hover/text:opacity-100 transition">
                                         <i class="fa-regular fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ad Placeholder - Mid Content -->
+            <div class="mb-12 p-6 border-2 border-dashed border-slate-700 rounded-xl text-center bg-slate-800/20">
+                <p class="text-slate-500 text-sm font-medium mb-2">Advertisement</p>
+                <div class="h-24 flex items-center justify-center text-slate-600">
+                    <div class="text-center">
+                        <i class="fa-brands fa-google text-2xl mb-2"></i>
+                        <p>Google AdSense (728x90)</p>
                     </div>
                 </div>
             </div>
@@ -340,21 +374,21 @@
                 <h3 class="text-xl font-bold text-white mb-6">Recommended Tools</h3>
                 <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-1 border border-slate-700">
                     <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
-                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block affiliate-link" data-affiliate="chatgpt">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black font-bold">C</div>
                                 <span class="font-bold text-white">ChatGPT Plus</span>
                             </div>
                             <p class="text-sm text-slate-400">Upgrade your AI experience.</p>
                         </a>
-                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block affiliate-link" data-affiliate="midjourney">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">M</div>
                                 <span class="font-bold text-white">Midjourney</span>
                             </div>
                             <p class="text-sm text-slate-400">Best for artistic images.</p>
                         </a>
-                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block">
+                        <a href="#" class="p-6 hover:bg-slate-800/50 transition block affiliate-link" data-affiliate="hostinger">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">H</div>
                                 <span class="font-bold text-white">Hostinger</span>
@@ -369,7 +403,10 @@
             <div class="mt-12 p-8 border-2 border-dashed border-slate-700 rounded-xl text-center bg-slate-800/20">
                 <p class="text-slate-500 text-sm font-medium">Advertisement</p>
                 <div class="h-24 flex items-center justify-center text-slate-600">
-                    Google AdSense Placeholder (728x90)
+                    <div class="text-center">
+                        <i class="fa-brands fa-google text-2xl mb-2"></i>
+                        <p>Google AdSense Placeholder (728x90)</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -414,7 +451,7 @@
                         <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> Priority Access</li>
                         <li class="flex items-center text-slate-300"><i class="fa-solid fa-check text-brand-500 mr-3"></i> History Export</li>
                     </ul>
-                    <button class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition shadow-lg shadow-brand-600/25">Upgrade Now</button>
+                    <button onclick="app.showUpgradeModal()" class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition shadow-lg shadow-brand-600/25">Upgrade Now</button>
                 </div>
             </div>
         </div>
@@ -470,8 +507,121 @@
         </div>
     </div>
 
+    <!-- Upgrade Modal -->
+    <div id="upgrade-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="app.closeUpgradeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl p-8 max-w-md w-full relative z-10 border border-slate-600">
+                <button onclick="app.closeUpgradeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-crown text-brand-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Upgrade to Pro</h3>
+                    <p class="text-slate-400 mb-6">Unlock unlimited generations and premium features.</p>
+                    <div class="space-y-3">
+                        <button class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition">
+                            Upgrade Now - $9/month
+                        </button>
+                        <button onclick="app.closeUpgradeModal()" class="w-full py-3 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 transition">
+                            Maybe Later
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="app.closeLoginModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl p-8 max-w-md w-full relative z-10 border border-slate-600">
+                <button onclick="app.closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Welcome Back</h3>
+                    <p class="text-slate-400">Login to access your account</p>
+                </div>
+                <form onsubmit="app.handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Email</label>
+                        <input type="email" placeholder="you@example.com" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <button type="submit" class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition">
+                        Login
+                    </button>
+                </form>
+                <p class="text-center text-slate-400 text-sm mt-4">
+                    Don't have an account? 
+                    <a href="#" onclick="app.showSignupModal()" class="text-brand-400 hover:text-brand-300">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="app.closeSignupModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl p-8 max-w-md w-full relative z-10 border border-slate-600">
+                <button onclick="app.closeSignupModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">Create Account</h3>
+                    <p class="text-slate-400">Start generating with AI</p>
+                </div>
+                <form onsubmit="app.handleSignup(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Name</label>
+                        <input type="text" placeholder="John Doe" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Email</label>
+                        <input type="email" placeholder="you@example.com" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <button type="submit" class="w-full py-3 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 transition">
+                        Create Account
+                    </button>
+                </form>
+                <p class="text-center text-slate-400 text-sm mt-4">
+                    Already have an account? 
+                    <a href="#" onclick="app.showLoginModal()" class="text-brand-400 hover:text-brand-300">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript Logic -->
     <script>
+        /**
+         * API Configuration
+         */
+        const API_CONFIG = {
+            image: {
+                baseUrl: 'https://water-brunette-shades-wash.trycloudflare.com',
+                endpoint: '/v1/images/generations'
+            },
+            text: {
+                baseUrl: 'https://responsibility-labor-ellis-principle.trycloudflare.com',
+                endpoint: '/v1/chat/completions'
+            },
+            maxRetries: 2,
+            timeout: 30000
+        };
+
         /**
          * Credit Management System
          * Handles the 5 generations per day limit using localStorage
@@ -514,175 +664,132 @@
         }
 
         /**
-         * Main Application Logic
+         * API Service with retry logic
          */
-        const app = {
-            credits: new CreditManager(),
-            currentImageUrl: null,
-            currentPrompt: null,
-
-            init() {
-                this.updateCreditDisplay();
-                this.renderHistory();
+        class ApiService {
+            static async fetchWithRetry(url, options, maxRetries = API_CONFIG.maxRetries) {
+                let lastError;
                 
-                // Check for daily reset on load
-                this.credits.getStatus(); 
-            },
+                for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+                        
+                        const response = await fetch(url, {
+                            ...options,
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        return await response.json();
+                    } catch (error) {
+                        lastError = error;
+                        
+                        if (error.name === 'AbortError') {
+                            console.warn(`Request timeout (attempt ${attempt + 1})`);
+                        } else {
+                            console.warn(`Request failed (attempt ${attempt + 1}):`, error.message);
+                        }
+                        
+                        if (attempt < maxRetries) {
+                            // Exponential backoff
+                            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+                        }
+                    }
+                }
+                
+                throw lastError;
+            }
 
-            // Navigation
-            navigate(viewId) {
-                // Hide all views
-                document.querySelectorAll('.view-section').forEach(el => {
-                    el.classList.remove('active');
+            static async generateImage(prompt) {
+                const url = `${API_CONFIG.image.baseUrl}${API_CONFIG.image.endpoint}`;
+                
+                const data = await this.fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        model: "black-forest-labs/FLUX.1-schnell",
+                        n: 1,
+                        width: 1024,
+                        height: 1024
+                    })
                 });
+
+                // Convert relative URL to full URL
+                let imageUrl = data.data[0].url;
+                if (imageUrl.startsWith('/')) {
+                    imageUrl = `${API_CONFIG.image.baseUrl}${imageUrl}`;
+                }
                 
-                // Show target view
-                const target = document.getElementById(`view-${viewId}`);
-                if (target) {
-                    target.classList.add('active');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
+                return imageUrl;
+            }
 
-                // Update nav active state (simple implementation)
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    // Reset styles logic could go here
-                });
-            },
-
-            scrollTo(id) {
-                this.navigate('home');
-                setTimeout(() => {
-                    const el = document.getElementById(id);
-                    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-            },
-
-            updateCreditDisplay() {
-                const status = this.credits.getStatus();
-                document.getElementById('credit-display').innerText = `${status.credits} / ${status.max}`;
-            },
-
-            showToast(message, type = 'success') {
-                const toast = document.getElementById('toast');
-                const msgEl = document.getElementById('toast-message');
-                const iconEl = document.getElementById('toast-icon');
-
-                msgEl.innerText = message;
-                iconEl.className = type === 'error' 
-                    ? 'fa-solid fa-circle-exclamation text-red-500' 
-                    : 'fa-solid fa-circle-check text-green-500';
-
-                toast.classList.remove('translate-y-20', 'opacity-0');
+            static async generateText(prompt, onStream = null) {
+                const url = `${API_CONFIG.text.baseUrl}${API_CONFIG.text.endpoint}`;
                 
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            },
-
-            setLoading(btnId, isLoading) {
-                const btn = document.getElementById(btnId);
-                if (isLoading) {
-                    btn.disabled = true;
-                    btn.innerHTML = `<div class="loader"></div> Processing...`;
-                    btn.classList.add('opacity-75', 'cursor-not-allowed');
-                } else {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
-                    // Reset button text based on ID
-                    if(btnId === 'btn-gen-img') btn.innerHTML = `<span>Generate Image</span><i class="fa-solid fa-arrow-right"></i>`;
-                    if(btnId === 'btn-gen-text') btn.innerHTML = `<span>Generate Text</span>`;
-                }
-            },
-
-            async generateImage() {
-                if (!this.credits.canGenerate()) {
-                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
-                    return;
-                }
-
-                const promptInput = document.getElementById('img-prompt');
-                const prompt = promptInput.value.trim();
-                
-                if (!prompt) {
-                    this.showToast('Please enter a prompt', 'error');
-                    return;
-                }
-
-                this.setLoading('btn-gen-img', true);
-                const resultArea = document.getElementById('img-result-area');
-                resultArea.classList.add('hidden');
-
-                try {
-                    // Use Credit
-                    this.credits.useCredit();
-                    this.updateCreditDisplay();
-
-                    // Call Real Image API
-                    const response = await fetch('https://rivers-dana-teenage-appreciate.trycloudflare.com/v1/images/generations', {
+                // Check if streaming is supported
+                if (onStream) {
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            prompt: prompt,
-                            model: "black-forest-labs/FLUX.1-schnell",
-                            n: 1,
-                            width: 1024,
-                            height: 1024
+                            model: "openrouter/auto",
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: prompt
+                                }
+                            ],
+                            stream: true
                         })
                     });
 
                     if (!response.ok) {
-                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    const data = await response.json();
-                    const imageUrl = data.data[0].url;
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullText = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.slice(6);
+                                if (data === '[DONE]') continue;
+                                
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    const content = parsed.choices?.[0]?.delta?.content || '';
+                                    fullText += content;
+                                    onStream(fullText);
+                                } catch (e) {
+                                    // Ignore parse errors for incomplete chunks
+                                }
+                            }
+                        }
+                    }
                     
-                    // Render
-                    this.currentImageUrl = imageUrl;
-                    this.currentPrompt = prompt;
-                    
-                    const imgEl = document.getElementById('img-output');
-                    imgEl.src = imageUrl;
-                    
-                    document.getElementById('img-meta').innerText = `Prompt: "${prompt}"`;
-                    resultArea.classList.remove('hidden');
-                    
-                    this.saveToHistory('Image', prompt, imageUrl);
-                    this.showToast('Image generated successfully!');
-
-                } catch (error) {
-                    console.error(error);
-                    this.showToast(error.message || 'Failed to generate image', 'error');
-                } finally {
-                    this.setLoading('btn-gen-img', false);
-                }
-            },
-
-            async generateText() {
-                if (!this.credits.canGenerate()) {
-                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
-                    return;
-                }
-
-                const promptInput = document.getElementById('text-prompt');
-                const prompt = promptInput.value.trim();
-                
-                if (!prompt) {
-                    this.showToast('Please enter a topic', 'error');
-                    return;
-                }
-
-                this.setLoading('btn-gen-text', true);
-                document.getElementById('text-result-area').classList.add('hidden');
-
-                try {
-                    this.credits.useCredit();
-                    this.updateCreditDisplay();
-
-                    // Call Real Text API
-                    const response = await fetch('https://molecular-justice-feelings-analyzed.trycloudflare.com/v1/chat/completions', {
+                    return fullText;
+                } else {
+                    // Non-streaming request with retry
+                    const data = await this.fetchWithRetry(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -698,25 +805,279 @@
                         })
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    return data.choices[0].message.content;
+                }
+            }
+        }
+
+        /**
+         * Main Application Logic
+         */
+        const app = {
+            credits: new CreditManager(),
+            currentImageUrl: null,
+            currentPrompt: null,
+            isGenerating: false,
+
+            init() {
+                this.updateCreditDisplay();
+                this.renderHistory();
+                this.credits.getStatus();
+            },
+
+            // Navigation
+            navigate(viewId) {
+                document.querySelectorAll('.view-section').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                const target = document.getElementById(`view-${viewId}`);
+                if (target) {
+                    target.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            },
+
+            scrollTo(id) {
+                this.navigate('home');
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            },
+
+            // Modal Management
+            showUpgradeModal() {
+                document.getElementById('upgrade-modal').classList.remove('hidden');
+            },
+
+            closeUpgradeModal() {
+                document.getElementById('upgrade-modal').classList.add('hidden');
+            },
+
+            showLoginModal() {
+                document.getElementById('login-modal').classList.remove('hidden');
+            },
+
+            closeLoginModal() {
+                document.getElementById('login-modal').classList.add('hidden');
+            },
+
+            showSignupModal() {
+                this.closeLoginModal();
+                document.getElementById('signup-modal').classList.remove('hidden');
+            },
+
+            closeSignupModal() {
+                document.getElementById('signup-modal').classList.add('hidden');
+            },
+
+            handleLogin(event) {
+                event.preventDefault();
+                this.showToast('Login functionality coming soon!', 'info');
+                this.closeLoginModal();
+            },
+
+            handleSignup(event) {
+                event.preventDefault();
+                this.showToast('Signup functionality coming soon!', 'info');
+                this.closeSignupModal();
+            },
+
+            // UI Updates
+            updateCreditDisplay() {
+                const status = this.credits.getStatus();
+                document.getElementById('credit-display').innerText = `${status.credits} / ${status.max}`;
+            },
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const msgEl = document.getElementById('toast-message');
+                const iconEl = document.getElementById('toast-icon');
+
+                msgEl.innerText = message;
+                
+                const icons = {
+                    success: 'fa-circle-check text-green-500',
+                    error: 'fa-circle-exclamation text-red-500',
+                    warning: 'fa-triangle-exclamation text-yellow-500',
+                    info: 'fa-circle-info text-blue-500'
+                };
+                
+                iconEl.className = `fa-solid ${icons[type] || icons.success}`;
+
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            },
+
+            setLoading(btnId, isLoading, text = 'Processing...') {
+                const btn = document.getElementById(btnId);
+                if (isLoading) {
+                    this.isGenerating = true;
+                    btn.disabled = true;
+                    btn.innerHTML = `<div class="loader mr-2"></div> ${text}`;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                } else {
+                    this.isGenerating = false;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    
+                    if(btnId === 'btn-gen-img') {
+                        btn.innerHTML = `<span>Generate Image</span><i class="fa-solid fa-arrow-right ml-2"></i>`;
+                    } else if(btnId === 'btn-gen-text') {
+                        btn.innerHTML = `<span>Generate Text</span>`;
+                    }
+                }
+            },
+
+            // Image Generation
+            async generateImage() {
+                if (this.isGenerating) return;
+                
+                if (!this.credits.canGenerate()) {
+                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
+                    this.showUpgradeModal();
+                    return;
+                }
+
+                const promptInput = document.getElementById('img-prompt');
+                const prompt = promptInput.value.trim();
+                
+                if (!prompt) {
+                    this.showToast('Please enter a prompt', 'warning');
+                    return;
+                }
+
+                this.setLoading('btn-gen-img', true, 'Generating...');
+                const resultArea = document.getElementById('img-result-area');
+                resultArea.classList.add('hidden');
+
+                try {
+                    // Use Credit
+                    this.credits.useCredit();
+                    this.updateCreditDisplay();
+
+                    // Call API with retry
+                    const imageUrl = await ApiService.generateImage(prompt);
+                    
+                    // Render
+                    this.currentImageUrl = imageUrl;
+                    this.currentPrompt = prompt;
+                    
+                    const imgEl = document.getElementById('img-output');
+                    imgEl.src = imageUrl;
+                    
+                    // Wait for image to load
+                    await new Promise((resolve, reject) => {
+                        imgEl.onload = resolve;
+                        imgEl.onerror = reject;
+                    });
+                    
+                    document.getElementById('img-meta').innerText = `Prompt: "${prompt}"`;
+                    resultArea.classList.remove('hidden');
+                    
+                    this.saveToHistory('Image', prompt, imageUrl);
+                    this.showToast('Image generated successfully!');
+
+                } catch (error) {
+                    console.error('Image generation error:', error);
+                    
+                    // Refund credit on failure
+                    const currentCredits = parseInt(localStorage.getItem(this.credits.key) || '0');
+                    localStorage.setItem(this.credits.key, currentCredits + 1);
+                    this.updateCreditDisplay();
+                    
+                    let errorMsg = 'Failed to generate image';
+                    if (error.message.includes('timeout') || error.name === 'AbortError') {
+                        errorMsg = 'Request timed out. Please try again.';
+                    } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+                        errorMsg = 'Network error. Please check your connection.';
+                    }
+                    
+                    this.showToast(errorMsg, 'error');
+                } finally {
+                    this.setLoading('btn-gen-img', false);
+                }
+            },
+
+            // Text Generation
+            async generateText() {
+                if (this.isGenerating) return;
+                
+                if (!this.credits.canGenerate()) {
+                    this.showToast('Free limit reached. Upgrade to Pro or return tomorrow.', 'error');
+                    this.showUpgradeModal();
+                    return;
+                }
+
+                const promptInput = document.getElementById('text-prompt');
+                const prompt = promptInput.value.trim();
+                
+                if (!prompt) {
+                    this.showToast('Please enter a topic', 'warning');
+                    return;
+                }
+
+                this.setLoading('btn-gen-text', true, 'Generating...');
+                
+                const textOutput = document.getElementById('text-output');
+                const resultArea = document.getElementById('text-result-area');
+                const regenBtn = document.getElementById('btn-regen-text');
+                
+                resultArea.classList.add('hidden');
+                regenBtn.classList.add('hidden');
+                textOutput.innerText = '';
+
+                try {
+                    this.credits.useCredit();
+                    this.updateCreditDisplay();
+
+                    // Try streaming first, fall back to non-streaming
+                    let generatedText = '';
+                    
+                    try {
+                        generatedText = await ApiService.generateText(prompt, (partialText) => {
+                            textOutput.innerText = partialText;
+                            resultArea.classList.remove('hidden');
+                        });
+                    } catch (streamError) {
+                        // Fall back to non-streaming
+                        console.log('Streaming failed, using fallback:', streamError.message);
+                        generatedText = await ApiService.generateText(prompt);
+                        textOutput.innerText = generatedText;
                     }
 
-                    const data = await response.json();
-                    const generatedText = data.choices[0].message.content;
+                    // Remove streaming cursor
+                    textOutput.classList.remove('streaming-cursor');
                     
-                    document.getElementById('text-output').innerText = generatedText;
-                    document.getElementById('text-result-area').classList.remove('hidden');
-                    document.getElementById('btn-regen-text').classList.remove('hidden');
+                    resultArea.classList.remove('hidden');
+                    regenBtn.classList.remove('hidden');
                     
                     this.saveToHistory('Text', prompt, generatedText.substring(0, 50) + '...');
                     this.showToast('Text generated successfully!');
 
                 } catch (error) {
-                    console.error(error);
-                    this.showToast(error.message || 'Failed to generate text', 'error');
+                    console.error('Text generation error:', error);
+                    
+                    // Refund credit
+                    const currentCredits = parseInt(localStorage.getItem(this.credits.key) || '0');
+                    localStorage.setItem(this.credits.key, currentCredits + 1);
+                    this.updateCreditDisplay();
+                    
+                    let errorMsg = 'Failed to generate text';
+                    if (error.message.includes('timeout') || error.name === 'AbortError') {
+                        errorMsg = 'Request timed out. Please try again.';
+                    } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+                        errorMsg = 'Network error. Please check your connection.';
+                    }
+                    
+                    this.showToast(errorMsg, 'error');
                 } finally {
                     this.setLoading('btn-gen-text', false);
+                    document.getElementById('text-output').classList.remove('streaming-cursor');
                 }
             },
 
@@ -724,45 +1085,77 @@
                 this.generateText();
             },
 
-            // --- Utilities ---
-
+            // Image Utilities
             downloadImage() {
-                if (!this.currentImageUrl) return;
+                if (!this.currentImageUrl) {
+                    this.showToast('No image to download', 'warning');
+                    return;
+                }
+                
                 const link = document.createElement('a');
                 link.href = this.currentImageUrl;
-                link.download = `ai-generated-${Date.now()}.jpg`;
+                link.download = `ai-generated-${Date.now()}.png`;
+                link.target = '_blank';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 this.showToast('Download started');
             },
 
+            openImageInNewTab() {
+                if (!this.currentImageUrl) {
+                    this.showToast('No image to open', 'warning');
+                    return;
+                }
+                window.open(this.currentImageUrl, '_blank');
+            },
+
             copyText() {
                 const text = document.getElementById('text-output').innerText;
+                if (!text) {
+                    this.showToast('No text to copy', 'warning');
+                    return;
+                }
+                
                 navigator.clipboard.writeText(text).then(() => {
                     this.showToast('Text copied to clipboard');
+                }).catch(() => {
+                    this.showToast('Failed to copy text', 'error');
                 });
             },
 
             copyPrompt(type) {
                 const prompt = type === 'img' ? this.currentPrompt : document.getElementById('text-prompt').value;
+                if (!prompt) {
+                    this.showToast('No prompt to copy', 'warning');
+                    return;
+                }
+                
                 navigator.clipboard.writeText(prompt).then(() => {
                     this.showToast('Prompt copied');
+                }).catch(() => {
+                    this.showToast('Failed to copy prompt', 'error');
                 });
             },
 
-            // --- History Management ---
-
+            // History Management
             saveToHistory(type, prompt, result) {
                 let history = JSON.parse(localStorage.getItem('ai_hub_history') || '[]');
+                
+                // Add new item
                 history.unshift({
                     type,
                     prompt,
                     result,
-                    date: new Date().toLocaleTimeString()
+                    date: new Date().toISOString(),
+                    displayDate: new Date().toLocaleString()
                 });
+                
                 // Keep last 10
-                if (history.length > 10) history.pop();
+                if (history.length > 10) {
+                    history = history.slice(0, 10);
+                }
+                
                 localStorage.setItem('ai_hub_history', JSON.stringify(history));
                 this.renderHistory();
             },
@@ -776,11 +1169,11 @@
                     return;
                 }
 
-                container.innerHTML = history.map(item => `
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-brand-500/50 transition group">
+                container.innerHTML = history.map((item, index) => `
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-brand-500/50 transition group cursor-pointer" onclick="app.loadFromHistory(${index})">
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-xs font-bold px-2 py-0.5 rounded ${item.type === 'Image' ? 'bg-blue-900 text-blue-300' : 'bg-purple-900 text-purple-300'}">${item.type}</span>
-                            <span class="text-xs text-slate-500">${item.date}</span>
+                            <span class="text-xs text-slate-500">${item.displayDate || new Date(item.date).toLocaleString()}</span>
                         </div>
                         <p class="text-sm text-slate-300 truncate mb-2" title="${item.prompt}">"${item.prompt}"</p>
                         <div class="h-1 w-full bg-slate-700 rounded overflow-hidden">
@@ -788,6 +1181,33 @@
                         </div>
                     </div>
                 `).join('');
+            },
+
+            loadFromHistory(index) {
+                const history = JSON.parse(localStorage.getItem('ai_hub_history') || '[]');
+                const item = history[index];
+                
+                if (!item) return;
+                
+                if (item.type === 'Image') {
+                    document.getElementById('img-prompt').value = item.prompt;
+                    this.currentImageUrl = item.result;
+                    this.currentPrompt = item.prompt;
+                    
+                    const imgEl = document.getElementById('img-output');
+                    imgEl.src = item.result;
+                    document.getElementById('img-meta').innerText = `Prompt: "${item.prompt}"`;
+                    document.getElementById('img-result-area').classList.remove('hidden');
+                    
+                    this.scrollTo('image-gen');
+                } else {
+                    document.getElementById('text-prompt').value = item.prompt;
+                    document.getElementById('text-output').innerText = item.result;
+                    document.getElementById('text-result-area').classList.remove('hidden');
+                    document.getElementById('btn-regen-text').classList.remove('hidden');
+                    
+                    this.scrollTo('text-gen');
+                }
             }
         };
 
@@ -795,7 +1215,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
-
     </script>
 </body>
 </html>
