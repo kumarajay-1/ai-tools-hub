@@ -618,7 +618,7 @@
                     this.updateCreditDisplay();
 
                     // Call Real Image API
-                    const response = await fetch('http://172.235.8.159:9200/v1/images/generations', {
+                    const response = await fetch('https://spray-injection-colors-poetry.trycloudflare.com/v1/images/generations', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -682,7 +682,7 @@
                     this.updateCreditDisplay();
 
                     // Call Real Text API
-                    const response = await fetch('http://172.235.8.159:8080/v1/chat/completions', {
+                    const response = await fetch('https://spray-injection-colors-poetry.trycloudflare.com/v1/chat/completions', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
